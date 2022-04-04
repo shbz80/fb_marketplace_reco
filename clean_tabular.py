@@ -14,6 +14,7 @@ class BasicCleaner(BaseEstimator, TransformerMixin):
         X.drop(columns=['id', 'page_id', 'create_time'], inplace=True)
         return X
 
+
 class NullCleaner(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
@@ -21,6 +22,7 @@ class NullCleaner(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X.dropna(inplace=True)
         return X
+
 
 class CatSplitterMixin():
     """ This mixin class provides methods for splitting heirarchical
@@ -36,7 +38,7 @@ class CatSplitterMixin():
     def split_by_slash(self, text):
         return self.split_string(text, '/')
 
-    def split_by_comma(self,text):
+    def split_by_comma(self, text):
         return self.split_string(text, ',')
 
     @staticmethod
@@ -66,12 +68,13 @@ class CatSplitterMixin():
         df = df.rename(columns={f'{cat_prefix}_{cat_ix}': f'{cat_prefix}'})
         return df
 
-       
+
 class ProductCatCleaner(BaseEstimator, TransformerMixin, CatSplitterMixin):
     ''' a dataset transformer that splits slash seperated categories in 
         categories column and expands the dataframe
     '''
-    def __init__(self, cat_selected=0):
+
+    def __init__(self, cat_selected=1):
         # categories to drop after splitting
         self.cat_selected = cat_selected
 
@@ -82,7 +85,7 @@ class ProductCatCleaner(BaseEstimator, TransformerMixin, CatSplitterMixin):
         X, cat_num = self.split_expand_col(X, 'category', self.split_by_slash)
 
         X = self.select_cat(X, cat_num, 'category', self.cat_selected)
-       
+
         return X
 
 
@@ -105,8 +108,10 @@ class LocationCatCleaner(BaseEstimator, TransformerMixin, CatSplitterMixin):
 
         return X
 
+
 class PriceDataCleaner(BaseEstimator, TransformerMixin):
     ''' a transformer for cleaning the price column '''
+
     def fit(self, X, y=None):
         return self
 
@@ -127,9 +132,7 @@ class PriceRegressionTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.drop(columns=['product_name', 'product_description'])
         cat_encoded = pd.get_dummies(X.category, drop_first=True)
-        # print(cat_encoded.info())
         loc_encoded = pd.get_dummies(X.location, drop_first=True)
-        print(loc_encoded.info())
         X = pd.concat([X, cat_encoded, loc_encoded], axis=1)
         X = X.drop(columns=['category', 'location'])
         return X
@@ -148,9 +151,3 @@ price_pipeline = Pipeline([
     ('common', basic_pipeline),
     ('price_reg', PriceRegressionTransformer()),
 ])
-
-
-
-
-
-
