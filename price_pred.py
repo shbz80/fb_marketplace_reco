@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import pickle
 from sqlalchemy import create_engine, inspect
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
@@ -39,11 +40,40 @@ with open(dir+file, 'rb') as f:
     products_raw_df = pickle.load(f)
 
 # split data into train and test
-data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
+cat_level = 0
+data_splitter = TrainTestSplitFBMarketData(product_cat_level=cat_level)
 train_data, test_date = data_splitter.train_test_split(products_raw_df, 0.2)
 
+# # VIEW DATA BEFORE ONEHOT ENCODING
+# # print(basic_pipeline.get_params(deep=True))
+# # set a category level
+# # 0 for broader level; 1 for detailed level (only 2 levels)
+# cat_level = 1
+# basic_pipeline.set_params(cat_cleaner__cat_selected=cat_level)
+# # set a location level
+# # 1 for broader level (e.g. London); 0 for detailed level (some region of London)
+# loc_level = 0
+# basic_pipeline.set_params(loc_cleaner__cat_selected=loc_level)
+# # do the transformation
+# train_data_basic = basic_pipeline.fit_transform(train_data)
+# cats = train_data_basic['category'].unique()
+# locs = train_data_basic['location'].unique()
+# print(cats, len(cats))
+# print(locs, len(locs))
+# # check for null values
+# if train_data_basic.isna().sum().sum():
+#     print(train_data_basic.isna().sum())
+#     raise ValueError
+
 # apply a pipleline transform to clean the training data
+cat_level = 1   # retain lower level category
+loc_level = 0   # retain higher level location
+price_pipeline.set_params(common__cat_cleaner__cat_selected=cat_level)
+basic_pipeline.set_params(loc_cleaner__cat_selected=loc_level)
 train_data_tr = price_pipeline.fit_transform(train_data)
+# check for null values
+if train_data_tr.isna().sum().sum():
+    raise ValueError
 # prepare input and target data
 price_labels = train_data_tr['price']
 price_input_data = train_data_tr.drop(columns=['price'])
@@ -104,7 +134,7 @@ Tree eval loss mean 231879.65708459564
 Tree eval loss std 133363.45006904562
 """
 
-# DECISION RANDOM FOREST REGRESSION
+# RANDOM FOREST REGRESSION
 forest_reg = RandomForestRegressor()
 forest_reg.fit(price_input_data, price_labels)
 price_predictions = forest_reg.predict(price_input_data)
