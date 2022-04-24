@@ -42,17 +42,21 @@ class CatSplitterMixin():
         return self.split_string(text, ',')
 
     @staticmethod
-    def pop_top_word(word_l):
+    def pop_top_word(word_l, **kwargs):
         if word_l:
-            return word_l.pop(0)
+            if not kwargs.get('rev'):
+                return word_l.pop(0)
+            else:
+                return word_l.pop()
         else:
             return None
 
-    def split_expand_col(self, df, col_name, sep_func):
+    def split_expand_col(self, df, col_name, sep_func, rev=False):
         df_cat_list = df[col_name].apply(sep_func)
         cat_num = max(df_cat_list.dropna().apply(len))
         for i in range(cat_num):
-            df[f'{col_name}_{i}'] = df_cat_list.apply(self.pop_top_word)
+            df[f'{col_name}_{i}'] = df_cat_list.apply(
+                self.pop_top_word, rev=rev)
         df.drop(columns=[col_name], inplace=True)
         return df, cat_num
 
@@ -75,17 +79,16 @@ class ProductCatCleaner(BaseEstimator, TransformerMixin, CatSplitterMixin):
     '''
 
     def __init__(self, cat_selected=1):
-        # categories to drop after splitting
+        # category to be retained after splitting
         self.cat_selected = cat_selected
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
-        X, cat_num = self.split_expand_col(X, 'category', self.split_by_slash)
-
+        X, cat_num = self.split_expand_col(
+            X, 'category', self.split_by_slash, rev=False)
         X = self.select_cat(X, cat_num, 'category', self.cat_selected)
-
         return X
 
 
@@ -95,17 +98,15 @@ class LocationCatCleaner(BaseEstimator, TransformerMixin, CatSplitterMixin):
     '''
 
     def __init__(self, cat_selected=1):
-        # categories to drop after splitting
         self.cat_selected = cat_selected
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
-        X, cat_num = self.split_expand_col(X, 'location', self.split_by_comma)
-
+        X, cat_num = self.split_expand_col(
+            X, 'location', self.split_by_comma, rev=True)
         X = self.select_cat(X, cat_num, 'location', self.cat_selected)
-
         return X
 
 
@@ -123,8 +124,9 @@ class PriceDataCleaner(BaseEstimator, TransformerMixin):
 
 
 class PriceRegressionTransformer(BaseEstimator, TransformerMixin):
-    ''' a transformer for preping tabular data for price prediction
-    regression problem. It drops all text fetaures'''
+    ''' a transformer for preping the tabular data for price prediction
+    regression problem. It assumes a preceding basic_cleaner.
+    It drops all text fetaures and onehot encodes categorical data.'''
 
     def fit(self, X, y=None):
         return self
