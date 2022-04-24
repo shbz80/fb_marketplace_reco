@@ -12,24 +12,31 @@ from sklearn.model_selection import cross_val_score
 from train_test_split import TrainTestSplitFBMarketData
 from clean_tabular import price_pipeline, basic_pipeline
 
-# connect to the RDS
-DATABASE_TYPE = 'postgresql'
-DBAPI = 'psycopg2'
-ENDPOINT = "products.c8k7he1p0ynz.us-east-1.rds.amazonaws.com"
-USER = 'postgres'
-PASSWORD = 'aicore2022!'
-PORT = 5432
-DATABASE = 'postgres'
-rds_engine = create_engine(
-    f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-rds_engine.connect()
-# read the products tabular data into a dataframe
-products_raw_df = pd.read_sql_table('products', rds_engine)
+# location for local storage
+dir = os.getcwd() + '/data/tabular/'
+file = 'tab_data_raw.pkl'
 
-# # saves the raw data in local disk
-# dir = os.getcwd() + '/data/tabular/'
-# file = 'raw_data'
-# products_raw_df.to_csv(path_or_buf=dir+file, index=False)
+# # LOAD TABLE FOM RDS AND SAVE LOCALLY
+# connect to the RDS
+# DATABASE_TYPE = 'postgresql'
+# DBAPI = 'psycopg2'
+# ENDPOINT = "products.c8k7he1p0ynz.us-east-1.rds.amazonaws.com"
+# USER = 'postgres'
+# PASSWORD = 'aicore2022!'
+# PORT = 5432
+# DATABASE = 'postgres'
+# rds_engine = create_engine(
+#     f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+# rds_engine.connect()
+# # read the products tabular data into a dataframe
+# products_raw_df = pd.read_sql_table('products', rds_engine)
+# save as the table
+# with open(dir+file, 'wb') as f:
+#     pickle.dump(products_raw_df, f)
+
+# load the saved local df
+with open(dir+file, 'rb') as f:
+    products_raw_df = pickle.load(f)
 
 # split data into train and test
 data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
