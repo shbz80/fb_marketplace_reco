@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
+import matplotlib.pyplot as plt
 from sqlalchemy import create_engine, inspect
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
@@ -13,30 +14,11 @@ from sklearn.model_selection import cross_val_score
 from train_test_split import TrainTestSplitFBMarketData
 from clean_tabular import price_pipeline, basic_pipeline
 
-# location for local storage
-dir = os.getcwd() + '/data/tabular/'
-file = 'tab_data_raw.pkl'
-
-# # LOAD TABLE FOM RDS AND SAVE LOCALLY
-# connect to the RDS
-# DATABASE_TYPE = 'postgresql'
-# DBAPI = 'psycopg2'
-# ENDPOINT = "products.c8k7he1p0ynz.us-east-1.rds.amazonaws.com"
-# USER = 'postgres'
-# PASSWORD = 'aicore2022!'
-# PORT = 5432
-# DATABASE = 'postgres'
-# rds_engine = create_engine(
-#     f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-# rds_engine.connect()
-# # read the products tabular data into a dataframe
-# products_raw_df = pd.read_sql_table('products', rds_engine)
-# save as the table
-# with open(dir+file, 'wb') as f:
-#     pickle.dump(products_raw_df, f)
+# location for tabular
+path_tabular = os.getcwd() + '/data/tabular/' + 'tab_data_raw.pkl'
 
 # load the saved local df
-with open(dir+file, 'rb') as f:
+with open(path_tabular, 'rb') as f:
     products_raw_df = pickle.load(f)
 
 # split data into train and test
@@ -58,8 +40,12 @@ train_data, test_date = data_splitter.train_test_split(products_raw_df, 0.2)
 # train_data_basic = basic_pipeline.fit_transform(train_data)
 # cats = train_data_basic['category'].unique()
 # locs = train_data_basic['location'].unique()
-# print(cats, len(cats))
-# print(locs, len(locs))
+# print('cats', len(cats))
+# print('locs', len(locs))
+# train_data_basic['category'].value_counts().plot.bar()
+# plt.show()
+# train_data_basic['location'].value_counts().plot.bar()
+# plt.show()
 # # check for null values
 # if train_data_basic.isna().sum().sum():
 #     print(train_data_basic.isna().sum())
