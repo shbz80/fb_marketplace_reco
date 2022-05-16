@@ -4,6 +4,7 @@ import pickle
 import joblib
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from train_test_split import TrainTestSplitFBMarketData
 from clean_tabular import basic_pipeline
 
@@ -160,15 +161,17 @@ if __name__ == '__main__':
     image_cleaner = PrepareImageData(
         products_raw_df, image_details_raw_df, images_dir)
 
-    # visualize the train data
+    # # visualize the train data
     # train_image_stat_dict = image_cleaner.get_image_stat(train_data_tr['category'])
     # train_image_stat = pd.DataFrame(train_image_stat_dict)
     # print(train_image_stat.describe())
     # train_image_stat.hist()
-    # train_image_stat['mode'].value_counts().plot.bar()
-    # train_image_stat['cat'].value_counts().plot.bar()
-    # print('cats', len(train_image_stat['cat'].value_counts()))
     # plt.show()
+    # train_image_stat['mode'].value_counts().plot.bar()
+    # plt.show()
+    # train_image_stat['cat'].value_counts().plot.bar()
+    # plt.show()
+    # print('cats', len(train_image_stat['cat'].value_counts()))
 
     image_cleaner.prepare_dataset(
         train_data_tr, test_data_tr,
