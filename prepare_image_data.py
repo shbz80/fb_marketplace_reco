@@ -94,15 +94,13 @@ class PrepareImageData():
                     im = im.rotate(90)
                 # im.show()
                 w, h = im.size
+                a_r = w / h
                 # resize image to required size maintaining aspect ratio
+                w_new = int(w_req)
                 h_new = int(w_req / a_r)
-                if h_new <= h_req:
-                    w_new = int(w_req)
-                else:
+                if h_new > h_req:
+                    h_new = h_req
                     w_new = int(h_req * a_r)
-                    h_new = int(h_req)
-                    if h_new > h_req:
-                        raise Exception
                 im = im.resize((w_new, h_new))
                 # print(im.size)
                 # im.show()
