@@ -44,18 +44,18 @@ class PrepareImageData():
                 stat_dict['cat'].append(prod_cat)
         return stat_dict
 
-    def prepare_dataset(self, train_data, test_data, pklname, size=None):
+    def prepare_dataset(self, train_data, test_data, pklname='img_pkl', size=None, mode='RGB'):
         if not size:
             size = (100, 150)
 
         train_dict = dict()
         test_dict = dict()
         
-        data, label = self.prepare_data(train_data)
+        data, label = self.prepare_data(train_data, size=size, mode=mode)
         train_dict['label'] = label
         train_dict['data'] = data
 
-        data, label = self.prepare_data(test_data)
+        data, label = self.prepare_data(test_data, size=size, mode=mode)
         test_dict['label'] = label
         test_dict['data'] = data
 
@@ -65,7 +65,7 @@ class PrepareImageData():
         joblib.dump(train_dict, train_pklname)
         joblib.dump(test_dict, test_pklname)
 
-    def prepare_data(self, dataset, size=None):
+    def prepare_data(self, dataset, size=None, mode='RGB'):
         if not size:
             size = (100, 150)
         # the required image size
@@ -84,8 +84,8 @@ class PrepareImageData():
                 image_file_path = self.image_path + file_name
                 im = Image.open(image_file_path)
                 # im.show()
-                # convert image to RGB
-                im = im.convert('RGB')
+                # convert image to the given mode
+                im = im.convert(mode)
                 # im.show()
                 # flip image to maintian an aspect ratio <= 1
                 w, h = im.size
@@ -170,4 +170,7 @@ if __name__ == '__main__':
     # print('cats', len(train_image_stat['cat'].value_counts()))
     # plt.show()
 
-    image_cleaner.prepare_dataset(train_data_tr, test_data_tr, 'img_prepared')
+    image_cleaner.prepare_dataset(
+        train_data_tr, test_data_tr,
+        pklname='img_prepared', size=(100, 150),
+        mode='RGB')
