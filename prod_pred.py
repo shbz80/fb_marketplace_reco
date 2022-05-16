@@ -1,54 +1,47 @@
-import pandas as pd
+import numpy as np
 import os
-import pickle
+import joblib
 import matplotlib.pyplot as plt
-from sqlalchemy import create_engine, inspect
-from prepare_image_data import PrepareImageData
-from train_test_split import TrainTestSplitFBMarketData
-from clean_tabular import price_pipeline, basic_pipeline
+from sklearn.pipeline import Pipeline
+from clean_images import RGBToGrayTransformer, HogTransformer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import SGDClassifier
 
-# location for tabular
-path_tabular = os.getcwd() + '/data/tabular/' + 'tab_data_raw.pkl'
+image_pipeline = Pipeline([
+    ('grayify', RGBToGrayTransformer()),
+    ('hogify', HogTransformer()),
+    ('scalify', StandardScaler()),
+])
 
-# location for images
-path_images = os.getcwd() + '/data/images/' + 'img_details.pkl'
+train_pklname = os.getcwd() + '/data/images/' + 'img_prepared' + '_train.pkl'
+test_pklname = os.getcwd() + '/data/images/' + 'img_prepared' + '_test.pkl'
 
-# LOAD SAVED TABULAR AND IMAGE DETAILS DATA
-with open(path_tabular, 'rb') as f:
-    products_raw_df = pickle.load(f)
-with open(path_images, 'rb') as f:
-    image_details_raw_df = pickle.load(f)
+# load the prepared data
+train_data = joblib.load(train_pklname)
+test_data = joblib.load(test_pklname)
 
-# split data into train and test
-data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
-train_data, test_data = data_splitter.train_test_split(products_raw_df, 0.2)
+X_train = np.array(train_data['data'])
+y_train = np.array(train_data['label'])
 
-# apply a pipleline transform to clean the training data
-# set a category level
-# 0 for broader level; 1 for detailed level (only 2 levels)
-cat_level = 1   # retain lower level category
-loc_level = 0   # retain higher level location
-basic_pipeline.set_params(cat_cleaner__cat_selected=cat_level)
-basic_pipeline.set_params(loc_cleaner__cat_selected=loc_level)
-train_data_tr = basic_pipeline.fit_transform(train_data)
-if train_data_tr.isna().sum().sum():
-    raise ValueError
-test_data_tr = basic_pipeline.fit_transform(test_data)
-if test_data_tr.isna().sum().sum():
-    raise ValueError
+X_test = np.array(test_data['data'])
+y_test = np.array(test_data['label'])
 
-images_dir = os.getcwd() + '/data/images/'
-image_cleaner = PrepareImageData(
-    products_raw_df, image_details_raw_df, images_dir)
+# apply the pipleline: grayify, hogify and scalify
+X_train_tr = image_pipeline.fit_transform(X_train)
+X_test_tr = image_pipeline.fit_transform(X_test)
 
-# # visualize the train data
-# train_image_stat_dict = image_cleaner.get_image_stat(train_data_tr['category'])
-# train_image_stat = pd.DataFrame(train_image_stat_dict)
-# train_image_stat.hist()
-# train_image_stat['mode'].value_counts().plot.bar()
-# train_image_stat['cat'].value_counts().plot.bar()
-# print('cats', len(train_image_stat['cat'].value_counts()))
-# plt.show()
+# fit to the default SGD classifier (linear SVM)
+sgd_clf = SGDClassifier(random_state=42, max_iter=1000, tol=1e-3)
+sgd_clf.fit(X_train_tr, y_train)
 
-# PREPARE TEST DATA
-test_image_ids = image_cleaner.get_image_ids(test_data_tr.index)
+# training loss
+y_pred = sgd_clf.predict(X_train_tr)
+correct_perc = sum(y_pred == y_train) / len(y_train)
+print('Training loss: ', correct_perc)
+# Training loss:  0.38534114609196546
+
+# test loss
+y_pred = sgd_clf.predict(X_test_tr)
+correct_perc = sum(y_pred == y_test) / len(y_test)
+print('Test loss: ', correct_perc)
+# Test loss:  0.1467455621301775

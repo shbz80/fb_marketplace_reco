@@ -2,15 +2,9 @@ import os
 import random
 import time
 import numpy as np
-import pandas as pd
 import joblib
-from PIL import Image
 from skimage.feature import hog
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-
 
 class RGBToGrayTransformer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -54,13 +48,6 @@ class HogTransformer(BaseEstimator, TransformerMixin):
             raise Exception('HOG tranformation failed')
 
 
-image_pipeline = Pipeline([
-    ('grayify', RGBToGrayTransformer()),
-    ('hogify', HogTransformer()),
-    ('scalify', StandardScaler()),
-])
-
-
 def view_random_images(im_data_dict, num_images=10, delay=3):
     data_size = len(im_data_dict['data'])
     for i in range(num_images):
@@ -86,30 +73,4 @@ if __name__ == '__main__':
     image_mode = im.mode
 
     # random images before transormations
-    # view_random_images(train_data, num_images=10, delay=3)
-
-    X_train = np.array(train_data['data'])
-    y_train = np.array(train_data['label'])
-
-    X_test = np.array(test_data['data'])
-    y_test = np.array(test_data['label'])
-    
-    # apply the pipleline: grayify, hogify and scalify
-    X_train_tr = image_pipeline.fit_transform(X_train)
-    X_test_tr = image_pipeline.fit_transform(X_test)
-
-    # fit to the default SGD classifier (linear SVM)
-    sgd_clf = SGDClassifier(random_state=42, max_iter=1000, tol=1e-3)
-    sgd_clf.fit(X_train_tr, y_train)
-
-    # training loss
-    y_pred =sgd_clf.predict(X_train_tr)
-    correct_perc = sum(y_pred == y_train) / len(y_train)
-    print('Training loss: ', correct_perc)
-    # Training loss:  0.38534114609196546
-
-    # test loss
-    y_pred =sgd_clf.predict(X_test_tr)
-    correct_perc = sum(y_pred == y_test) / len(y_test)
-    print('Test loss: ', correct_perc)
-    # Test loss:  0.1467455621301775
+    view_random_images(train_data, num_images=10, delay=3)
