@@ -18,7 +18,7 @@ class TrainTestSplitFBMarketData():
         """ Splits and returns the two datasets """
         split_1 = StratifiedShuffleSplit(
             n_splits=1, test_size=ratio[2], random_state=42)
-
+        
         # use this piple line to extract the product catagory level that 
         # is used for the stratified shuffle
         split_pipeline = Pipeline([
