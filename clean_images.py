@@ -1,3 +1,6 @@
+'''
+Classes in this module implements transformers fot the SVM-HOG classifier
+'''
 import os
 import random
 import time
