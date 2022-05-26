@@ -1,8 +1,10 @@
+'''
+Implements classes for preparing the image data for CNN classification
+'''
 from PIL import Image
 import os
 import pickle
 import joblib
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from train_test_split import TrainTestSplitFBMarketData
@@ -139,13 +141,11 @@ class PrepareImageData():
                 # im.show()
                 # convert image to the given mode
                 im = im.convert(mode)
-                # im.show()
                 # flip image to maintian an aspect ratio <= 1
                 w, h = im.size
                 a_r = w / h
                 if a_r > 1.0:
                     im = im.rotate(90)
-                # im.show()
                 w, h = im.size
                 a_r = w / h
                 # resize image to required size maintaining aspect ratio
@@ -155,11 +155,8 @@ class PrepareImageData():
                     h_new = h_req
                     w_new = int(h_req * a_r)
                 im = im.resize((w_new, h_new))
-                # print(im.size)
-                # im.show()
                 # create a black image of the req size
                 result = Image.new(im.mode, (w_req, h_req), (0, 0, 0))
-                # result.show()
                 if w_new < w_req:
                     w_margin = (w_req - w_new) / 2
                 else:
@@ -172,7 +169,6 @@ class PrepareImageData():
                 h_margin = int(h_margin)
                 # paste the image on to the background to pad
                 result.paste(im, (w_margin, h_margin))
-                # result.show()
                 data.append(result)
                 label.append(prod_cat)
                 desc.append(prod_name + ' ' + prod_des)
