@@ -70,25 +70,36 @@ class PrepareImageData():
                 stat_dict['cat'].append(prod_cat)
         return stat_dict
 
-    def prepare_dataset(self, train_data, test_data, pklname='img_pkl', size=None, mode='RGB'):
+    def prepare_dataset(self, train_data, val_data, test_data,
+                pklname='img_pkl', size=None, mode='RGB'):
         if not size:
             size = (100, 150)
 
         train_dict = dict()
+        val_dict = dict()
         test_dict = dict()
         
-        data, label = self.prepare_data(train_data, size=size, mode=mode)
+        data, label, desc = self.prepare_data(train_data, size=size, mode=mode)
         train_dict['label'] = label
         train_dict['data'] = data
+        train_dict['desc'] = desc
 
-        data, label = self.prepare_data(test_data, size=size, mode=mode)
+        data, label, desc = self.prepare_data(val_data, size=size, mode=mode)
+        val_dict['label'] = label
+        val_dict['data'] = data
+        val_dict['desc'] = desc
+
+        data, label, desc = self.prepare_data(test_data, size=size, mode=mode)
         test_dict['label'] = label
         test_dict['data'] = data
+        test_dict['desc'] = desc
 
         train_pklname = os.getcwd() + '/data/images/' + pklname + '_train.pkl'
+        val_pklname = os.getcwd() + '/data/images/' + pklname + '_val.pkl'
         test_pklname = os.getcwd() + '/data/images/' + pklname + '_test.pkl'
 
         joblib.dump(train_dict, train_pklname)
+        joblib.dump(train_dict, val_pklname)
         joblib.dump(test_dict, test_pklname)
 
     def prepare_data(self, dataset, size=None, mode='RGB'):
@@ -110,6 +121,7 @@ class PrepareImageData():
         product_ixs = dataset.index
         label = []
         data = []
+        desc = []
         # loop through the product indices
         for prod_ix in product_ixs:
             # get some column values for this index
@@ -163,7 +175,7 @@ class PrepareImageData():
                 # result.show()
                 data.append(result)
                 label.append(prod_cat)
-        return data, label
+                desc.append(prod_name + ' ' + prod_des)
 
 if __name__ == '__main__':
     # location for tabular
@@ -181,6 +193,8 @@ if __name__ == '__main__':
     # split data into train and test
     data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
     # split the data into train (70) val (15) and test (15)
+    tab_train, tab_val, tab_test = data_splitter.train_test_split(
+        products_raw_df, (0.7, 0.15, 0.15))
 
     # apply a pipleline transform to clean the training data
     # set a category level
@@ -192,8 +206,9 @@ if __name__ == '__main__':
     train_data_tr = basic_pipeline.fit_transform(train_data)
     if train_data_tr.isna().sum().sum():
         raise ValueError
-    test_data_tr = basic_pipeline.fit_transform(test_data)
-    if test_data_tr.isna().sum().sum():
+    # apply transform on tabular val data
+    tab_val_tr = tab_basic_pipeline.fit_transform(tab_val)
+    if tab_val_tr.isna().sum().sum():
         raise ValueError
 
     images_dir = os.getcwd() + '/data/images/'
@@ -216,6 +231,6 @@ if __name__ == '__main__':
     # each data set contains images, labels and descriptions
     # image data is prepared for RESNET-50
     image_cleaner.prepare_dataset(
-        train_data_tr, test_data_tr,
-        pklname='img_prepared', size=(100, 150),
+        tab_train_tr, tab_val_tr, tab_test_tr,
+        pklname='img_prepared', size=(224, 224),
         mode='RGB')
