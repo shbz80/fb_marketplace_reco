@@ -49,6 +49,9 @@ class HogTransformer(BaseEstimator, TransformerMixin):
 
 
 def view_random_images(im_data_dict, num_images=10, delay=3):
+    '''
+    displays random images from im_data_dict
+    '''
     data_size = len(im_data_dict['data'])
     for i in range(num_images):
         ix = random.randint(0, data_size - 1)
@@ -73,4 +76,4 @@ if __name__ == '__main__':
     image_mode = im.mode
 
     # random images before transormations
-    view_random_images(train_data, num_images=10, delay=3)
+    # view_random_images(train_data, num_images=10, delay=3)
