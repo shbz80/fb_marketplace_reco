@@ -10,12 +10,26 @@ from clean_tabular import basic_pipeline
 
 
 class PrepareImageData():
+    """The main class for preparing the datasets for CNN classification"""
     def __init__(self, product_df, image_details_df, image_path):
+        """
+        Args:
+            product_df (dataframe): the main tabular data
+            image_details_df (dataframe): the image tabular data
+            image_path (str): path to the raw images
+        """
         self.product_df = product_df
         self.image_details_df = image_details_df
         self.image_path = image_path
 
     def get_image_ids(self, product_ix):
+        """Returns all the image ids for the given product id
+        Args:
+            product_ix (index): product index
+
+        Returns:
+            str: the image uuids for the given product index
+        """
         product_ids = self.product_df['id']
         product_id = product_ids.loc[product_ix]
         image_prod_ids = self.image_details_df['product_id']
@@ -24,15 +38,26 @@ class PrepareImageData():
         return selected_image_ids
 
     def get_image_stat(self, cat_labels_tr):
+        """prepares and return a stat dict for images
+        Args:
+            cat_labels_tr (pd series): the product category column
+
+        Returns:
+            dict: dict that contains image stats
+        """
+        # get all product indices
         product_ixs = cat_labels_tr.index
         stat_dict = {'width': [], 'height': [],
                      'aspect_ratio': [], 'mode': [], 'cat': []}
+        # loop though product indices
         for prod_ix in product_ixs:
+            # get the product category for this index
             prod_cat = cat_labels_tr.loc[prod_ix]
-            # prod_des = self.product_df.loc[prod_ix]['product_description']
-            # print(prod_des, prod_cat)
+            # get all image uuids (also file names) for this prod index
             prod_image_ids = self.get_image_ids(prod_ix)
+            # loop through all the images of this prod index
             for prod_image_id in prod_image_ids:
+                # get the image path
                 file_name = prod_image_id + '.jpg'
                 image_file_path = self.image_path + file_name
                 im = Image.open(image_file_path)
@@ -67,6 +92,15 @@ class PrepareImageData():
         joblib.dump(test_dict, test_pklname)
 
     def prepare_data(self, dataset, size=None, mode='RGB'):
+        """Prepares a dataset with images, label and text descriptions
+        Args:
+            dataset (pd dataframe): the main tabular dataframe
+            size (tuple, optional): image size. Defaults to None.
+            mode (str, optional): image mode. Defaults to 'RGB'.
+
+        Returns:
+            tuple: a tuple of lists of image, label and description
+        """
         if not size:
             size = (100, 150)
         # the required image size
@@ -76,11 +110,17 @@ class PrepareImageData():
         product_ixs = dataset.index
         label = []
         data = []
+        # loop through the product indices
         for prod_ix in product_ixs:
+            # get some column values for this index
             prod_cat = dataset.loc[prod_ix]['category']
             prod_des = dataset.loc[prod_ix]['product_description']
+            prod_name = dataset.loc[prod_ix]['product_name']
+            # get all the image uuids (also file names) for this prod index
             prod_image_ids = self.get_image_ids(prod_ix)
+            # loop though the image uuids
             for prod_image_id in prod_image_ids:
+                # open the image
                 file_name = prod_image_id + '.jpg'
                 image_file_path = self.image_path + file_name
                 im = Image.open(image_file_path)
@@ -118,7 +158,7 @@ class PrepareImageData():
                 else:
                     h_margin = 0
                 h_margin = int(h_margin)
-                # paste the image on to thw background
+                # paste the image on to the background to pad
                 result.paste(im, (w_margin, h_margin))
                 # result.show()
                 data.append(result)
@@ -140,8 +180,7 @@ if __name__ == '__main__':
 
     # split data into train and test
     data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
-    train_data, test_data = data_splitter.train_test_split(
-        products_raw_df, 0.2)
+    # split the data into train (70) val (15) and test (15)
 
     # apply a pipleline transform to clean the training data
     # set a category level
@@ -173,6 +212,9 @@ if __name__ == '__main__':
     # plt.show()
     # print('cats', len(train_image_stat['cat'].value_counts()))
 
+    # prepare the train, val and test datasets
+    # each data set contains images, labels and descriptions
+    # image data is prepared for RESNET-50
     image_cleaner.prepare_dataset(
         train_data_tr, test_data_tr,
         pklname='img_prepared', size=(100, 150),
