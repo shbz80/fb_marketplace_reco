@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from train_test_split import TrainTestSplitFBMarketData
-from clean_tabular import basic_pipeline
+from clean_tabular import basic_pipeline as tab_basic_pipeline
 
 
 class PrepareImageData():
@@ -176,6 +176,7 @@ class PrepareImageData():
                 data.append(result)
                 label.append(prod_cat)
                 desc.append(prod_name + ' ' + prod_des)
+        return data, label, desc
 
 if __name__ == '__main__':
     # location for tabular
@@ -199,13 +200,21 @@ if __name__ == '__main__':
     # apply a pipleline transform to clean the training data
     # set a category level
     # 0 for broader level; 1 for detailed level (only 2 levels)
-    cat_level = 1   # retain lower level category
+    cat_level = 0   # retain higher level category
     loc_level = 0   # retain higher level location
-    basic_pipeline.set_params(cat_cleaner__cat_selected=cat_level)
-    basic_pipeline.set_params(loc_cleaner__cat_selected=loc_level)
-    train_data_tr = basic_pipeline.fit_transform(train_data)
-    if train_data_tr.isna().sum().sum():
+    tab_basic_pipeline.set_params(cat_cleaner__cat_selected=cat_level)
+    tab_basic_pipeline.set_params(loc_cleaner__cat_selected=loc_level)
+
+    # apply transform on tabular train data
+    tab_train_tr = tab_basic_pipeline.fit_transform(tab_train)
+    if tab_train_tr.isna().sum().sum():
         raise ValueError
+
+    # apply transform on tabular test data
+    tab_test_tr = tab_basic_pipeline.fit_transform(tab_test)
+    if tab_test_tr.isna().sum().sum():
+        raise ValueError
+
     # apply transform on tabular val data
     tab_val_tr = tab_basic_pipeline.fit_transform(tab_val)
     if tab_val_tr.isna().sum().sum():
@@ -216,7 +225,7 @@ if __name__ == '__main__':
         products_raw_df, image_details_raw_df, images_dir)
 
     # # visualize the train data
-    # train_image_stat_dict = image_cleaner.get_image_stat(train_data_tr['category'])
+    # train_image_stat_dict = image_cleaner.get_image_stat(tab_train_tr['category'])
     # train_image_stat = pd.DataFrame(train_image_stat_dict)
     # print(train_image_stat.describe())
     # train_image_stat.hist()
@@ -234,3 +243,4 @@ if __name__ == '__main__':
         tab_train_tr, tab_val_tr, tab_test_tr,
         pklname='img_prepared', size=(224, 224),
         mode='RGB')
+
