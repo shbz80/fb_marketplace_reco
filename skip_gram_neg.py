@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor, nn
+from typing import List
 
 class SkipGramNeg(nn.Module):
     """The Skip-Gram negative samping model."""
@@ -7,7 +8,7 @@ class SkipGramNeg(nn.Module):
         self,
         vocab_size: int,
         embed_dim: int = 100,
-        noise_dist: list[float] = None,
+        noise_dist: List[float] = None,
         neg_sample_size: int = 5,
         batch_size: int = 64,
         ) -> None:
@@ -35,12 +36,12 @@ class SkipGramNeg(nn.Module):
         self.in_embed = nn.Embedding(vocab_size, embed_dim)
         self.out_embed = nn.Embedding(vocab_size, embed_dim)
 
-    def forward_input(self, input_words: list[int]) -> Tensor:
+    def forward_input(self, input_words: List[int]) -> Tensor:
         # return input vector embeddings
         input_vectors = self.in_embed(input_words)
         return input_vectors
 
-    def forward_output(self, output_words: list[int]) -> Tensor:
+    def forward_output(self, output_words: List[int]) -> Tensor:
         # return output vector embeddings
         output_vectors = self.out_embed(output_words)
         return output_vectors
@@ -48,7 +49,7 @@ class SkipGramNeg(nn.Module):
     def generate_neg_samples(
                              self, 
                              extended_batch_size,
-                             exclude_words: list[int] = None, 
+                             exclude_words: List[int] = None, 
                              device: str = "cpu",
                              ) -> Tensor:
         """Generate noise vectors with shape (batch_size, neg_sample_size,
