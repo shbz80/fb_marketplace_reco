@@ -131,3 +131,5 @@ dmypy.json
 # project data folder
 data/
 log/
+runs/
+save/
