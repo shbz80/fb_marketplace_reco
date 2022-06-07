@@ -113,3 +113,82 @@ class TextCorpusProcess():
             prod_word_idx_lists.append(
                 [self.word_to_idx[word] for word in wordlist])
         return prod_word_idx_lists
+
+
+class Word2VecDataloader():
+    """Creates a dataloader generator."""
+    
+    def __init__(
+        self, 
+        prod_word_idx_lists: list[list[str]],
+        batch_size: int = 64, 
+        window_size: int = 5) -> None:
+        """
+        Args:
+            prod_word_idx_lists (list[list[str]]): list of word index lists
+            batch_size (int, optional): number of input words in batch.
+            Defaults to 64.
+            window_size (int, optional): window size for context words.
+            Defaults to 5.
+        """
+        self.prod_word_idx_lists = prod_word_idx_lists
+        self.batch_size = batch_size
+        self.window_size = window_size
+
+    def generate_batch(self):
+        """Generates batches
+
+        Yields:
+            input, target: the input target pair of a batch
+        """
+        sample_count = 0
+        inputs = []
+        targets = []
+        # loop through each product description
+        for words_idx in self.prod_word_idx_lists:
+            words_len = len(words_idx)
+            start_idx = 0
+            # loops through the current product description in batches
+            while start_idx < words_len:
+                if start_idx + self.batch_size > words_len:
+                    end_idx = words_len
+                else:
+                    end_idx = start_idx + self.batch_size
+                # extract the current batch of input words
+                words_batch = words_idx[start_idx:end_idx]
+                # iterate through all words in the batch
+                for i, word in enumerate(words_batch):
+                    # get context words for the current input word
+                    # and set them as targets
+                    word_targets = self.get_target(words_batch, i)
+                    targets.extend(word_targets)
+                    inputs.extend([word]*len(word_targets))
+                sample_count += len(words_batch)
+                # yield if the sample count in the current batch staisfies
+                # the batch size. If not, go to the next batch in the current
+                # prod desc. If the current prod desc is too small for the batch,
+                # go to the next prod desc.
+                if sample_count >= self.batch_size:
+                    yield inputs, targets
+                    inputs = []
+                    targets = []
+                    sample_count = 0
+                start_idx = end_idx
+
+    def get_target(self, words: list[str], idx: int) -> list[str]:
+        """Creates a list of target context words within a given word list
+
+        Args:
+            words (list[str]): the given wordlist
+            idx (int): index of the chosen input word
+
+        Returns:
+            list[str]: a list of target context words
+        """
+        w = np.random.randint(1, self.window_size + 1)
+        start = idx - w if (idx - w) > 0 else 0
+        stop = idx + w if (idx + w) < len(words) else len(words)
+        target_words = words[start:idx] + words[idx+1:stop+1]
+
+        return list(target_words)
+
