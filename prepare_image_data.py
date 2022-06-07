@@ -171,7 +171,11 @@ class PrepareImageData():
                 result.paste(im, (w_margin, h_margin))
                 data.append(result)
                 label.append(prod_cat)
-                desc.append(prod_name + ' ' + prod_des)
+                if prod_name[-1] == '.':
+                    spacer = ' '
+                else:
+                    spacer = '. '
+                desc.append(prod_name + spacer + prod_des)
         return data, label, desc
 
 if __name__ == '__main__':
