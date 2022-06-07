@@ -1,11 +1,11 @@
 import numpy as np
 from collections import Counter
-from typing import Tuple, Any, Optional
+from typing import Tuple, Any, Optional, List
 from nltk.corpus import stopwords
 
 
 class TextCorpusProcess():
-    def __init__(self, punct_dict: dict, prod_descs: list[str]) -> None:
+    def __init__(self, punct_dict: dict, prod_descs: List[str]) -> None:
         self.punct_dict = punct_dict
         self.prod_descs = prod_descs
         self.prod_word_lists = self.create_prod_word_lists()
@@ -44,7 +44,7 @@ class TextCorpusProcess():
         words = text.split()
         return words
 
-    def create_prod_word_lists(self) -> list[list[str]]:
+    def create_prod_word_lists(self) -> List[List[str]]:
         """Creates a list of word lists, each word list corresponds to
         a product description.
 
@@ -59,7 +59,7 @@ class TextCorpusProcess():
             prod_word_lists.append(prod_words)
         return prod_word_lists
     
-    def create_word_list(self) -> list[str]:
+    def create_word_list(self) -> List[str]:
         """Create a list of all words in the corpus
 
         Returns:
@@ -70,7 +70,7 @@ class TextCorpusProcess():
             word_list.extend(words)
         return word_list
 
-    def create_sorted_vocab(self) -> list[str]:
+    def create_sorted_vocab(self) -> List[str]:
         """Creates a vocab list sorted based on frequency
         """
         word_counts = Counter(self.word_list)
@@ -90,7 +90,7 @@ class TextCorpusProcess():
 
         return word_to_idx, idx_to_word
 
-    def create_word_idx_list(self) -> list[int]:
+    def create_word_idx_list(self) -> List[int]:
         """Creates a list word indices from the list of actual words"""
         return [self.word_to_idx[word] for word in self.word_list]
 
@@ -102,7 +102,7 @@ class TextCorpusProcess():
                  count in word_idx_counts.items()}
         return freqs
 
-    def create_prod_word_idx_lists(self) -> list[list[str]]:
+    def create_prod_word_idx_lists(self) -> List[List[str]]:
         """Converts the prod list of word lists to its corresponding word indices
 
         Returns:
@@ -120,7 +120,7 @@ class Word2VecDataloader():
     
     def __init__(
         self, 
-        prod_word_idx_lists: list[list[str]],
+        prod_word_idx_lists: List[List[str]],
         batch_size: int = 64, 
         window_size: int = 5) -> None:
         """
@@ -175,7 +175,7 @@ class Word2VecDataloader():
                     sample_count = 0
                 start_idx = end_idx
 
-    def get_target(self, words: list[str], idx: int) -> list[str]:
+    def get_target(self, words: List[str], idx: int) -> List[str]:
         """Creates a list of target context words within a given word list
 
         Args:
