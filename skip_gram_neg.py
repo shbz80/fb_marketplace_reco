@@ -72,10 +72,23 @@ class SkipGramNeg(nn.Module):
 
         # sample words from the noise distribution
         # TODO: implement exclude list
-        neg_words = torch.multinomial(
-            noise_dist,
-            extended_batch_size * self.neg_sample_size,
-            replacement=True)
+        if exclude_words is None:
+            neg_words = torch.multinomial(
+                noise_dist,
+                extended_batch_size * self.neg_sample_size,
+                replacement=True)
+        else:
+            neg_samples = []
+            num_samples = extended_batch_size * self.neg_sample_size
+            while num_samples > 0:
+                samples = torch.multinomial(
+                    noise_dist,
+                    num_samples,
+                    replacement=True).tolist()
+                samples = [word for word in samples if not word in exclude_words]
+                neg_samples.extend(samples)
+                num_samples -= len(samples)
+            neg_words = torch.tensor(neg_samples)
 
         neg_words = neg_words.to(device)
 
