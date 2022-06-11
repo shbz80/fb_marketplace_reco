@@ -1,3 +1,6 @@
+"""This module implements the Skip-gram model and its associated loss function.
+Based on https://programmer.group/pytorch-implements-word2vec.html
+"""
 import torch
 from torch import Tensor, nn
 from typing import List
