@@ -195,7 +195,7 @@ if __name__ == '__main__':
     data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
     # split the data into train (70) val (15) and test (15)
     tab_train, tab_val, tab_test = data_splitter.train_test_split(
-        products_raw_df, (0.7, 0.15, 0.15))
+        products_raw_df, (0.6, 0.2, 0.2))
 
     # apply a pipleline transform to clean the training data
     # set a category level
