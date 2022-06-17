@@ -101,7 +101,7 @@ class PrepareImageData():
         test_pklname = os.getcwd() + '/data/images/' + pklname + '_test.pkl'
 
         joblib.dump(train_dict, train_pklname)
-        joblib.dump(train_dict, val_pklname)
+        joblib.dump(val_dict, val_pklname)
         joblib.dump(test_dict, test_pklname)
 
     def prepare_data(self, dataset, size=None, mode='RGB'):
