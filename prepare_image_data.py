@@ -192,8 +192,12 @@ if __name__ == '__main__':
         image_details_raw_df = pickle.load(f)
 
     # split data into train and test
-    data_splitter = TrainTestSplitFBMarketData(product_cat_level=0)
+    # use lower level category for stratified split
+    cat_level = 1   
+    data_splitter = TrainTestSplitFBMarketData(product_cat_level=cat_level)
     # split the data into train (70) val (15) and test (15)
+    # tab_train, tab_val, tab_test = data_splitter.train_test_split(
+    #     products_raw_df, (0.7, 0.15, 0.15))
     tab_train, tab_val, tab_test = data_splitter.train_test_split(
         products_raw_df, (0.6, 0.2, 0.2))
 
