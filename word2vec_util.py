@@ -2,11 +2,13 @@ import numpy as np
 from collections import Counter
 from typing import Tuple, Any, Optional, List
 from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer, WordNetLemmatizer
+from nltk.tokenize import RegexpTokenizer
+from nltk import word_tokenize
 
 
 class TextCorpusProcess():
-    def __init__(self, punct_dict: dict, prod_descs: List[str]) -> None:
-        self.punct_dict = punct_dict
+    def __init__(self, prod_descs: List[str]) -> None:
         self.prod_descs = prod_descs
         self.prod_word_lists = self.create_prod_word_lists()
         self.word_list = self.create_word_list()
@@ -17,33 +19,6 @@ class TextCorpusProcess():
         self.freq_dict = self.create_freq_dict()
         self.vocab_size = len(self.freq_dict)
     
-    def replace_punctuations(self, text: str) -> str:
-        """Replaces punctuations in the given text with correspodning tags
-
-        Args:
-            text (str): given text
-
-        Returns:
-            str: process text
-        """
-        for punct, tag in self.punct_dict.items():
-            text = text.replace(punct, ' ' + tag + ' ')
-        return text
-
-    def preprocess(self, text: str) -> str:
-        """Processes text for word2vec training
-
-        Args:
-            text (str): given text
-
-        Returns:
-            str: process text
-        """
-        text = text.lower()
-        text = self.replace_punctuations(text)
-        words = text.split()
-        return words
-
     def create_prod_word_lists(self) -> List[List[str]]:
         """Creates a list of word lists, each word list corresponds to
         a product description.
@@ -53,10 +28,29 @@ class TextCorpusProcess():
         """
         prod_word_lists = []
         for prod_desc in self.prod_descs:
-            prod_words = self.preprocess(prod_desc)
-            prod_words = [word for word in prod_words if not word
-                     in stopwords.words('english')]
-            prod_word_lists.append(prod_words)
+            # convert all tolower case
+            lower_txt = prod_desc.lower()
+            # remove everthing except alphanumeric chars
+            word_tokenize = RegexpTokenizer(r'\w+')
+            tokenized_lower_txt = word_tokenize.tokenize(lower_txt)
+            # remove stopwords
+            stop_words = stopwords.words('english')
+            stop_removed_tokenized_lower_txt = [
+                word for word in tokenized_lower_txt if word not in stop_words]
+            # lemmtize words
+            wordnet_lemmatizer = WordNetLemmatizer()
+            lemmatized_stop_removed_tokenized_lower_txt = [wordnet_lemmatizer.lemmatize(
+                word) for word in stop_removed_tokenized_lower_txt]
+            # stem words
+            snowball_stemmer = SnowballStemmer('english')
+            stemmed_lemmatized_stop_removed_tokenized_lower_txt = [snowball_stemmer.stem(
+                word) for word in lemmatized_stop_removed_tokenized_lower_txt]
+            # the final processed text
+            processed_txt = stemmed_lemmatized_stop_removed_tokenized_lower_txt
+            # prod_words = self.preprocess(prod_desc)
+            # prod_words = [word for word in prod_words if not word
+            #          in stopwords.words('english')]
+            prod_word_lists.append(processed_txt)
         return prod_word_lists
     
     def create_word_list(self) -> List[str]:
