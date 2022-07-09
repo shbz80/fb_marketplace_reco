@@ -139,36 +139,7 @@ class PrepareImageData():
                 image_file_path = self.image_path + file_name
                 im = Image.open(image_file_path)
                 # im.show()
-                # convert image to the given mode
-                im = im.convert(mode)
-                # flip image to maintian an aspect ratio <= 1
-                w, h = im.size
-                a_r = w / h
-                if a_r > 1.0:
-                    im = im.rotate(90)
-                w, h = im.size
-                a_r = w / h
-                # resize image to required size maintaining aspect ratio
-                w_new = int(w_req)
-                h_new = int(w_req / a_r)
-                if h_new > h_req:
-                    h_new = h_req
-                    w_new = int(h_req * a_r)
-                im = im.resize((w_new, h_new))
-                # create a black image of the req size
-                result = Image.new(im.mode, (w_req, h_req), (0, 0, 0))
-                if w_new < w_req:
-                    w_margin = (w_req - w_new) / 2
-                else:
-                    w_margin = 0
-                w_margin = int(w_margin)
-                if h_new < h_req:
-                    h_margin = (h_req - h_new) / 2
-                else:
-                    h_margin = 0
-                h_margin = int(h_margin)
-                # paste the image on to the background to pad
-                result.paste(im, (w_margin, h_margin))
+                result = self.process_image(im, size, mode)
                 data.append(result)
                 label.append(prod_cat)
                 if prod_name[-1] == '.':
@@ -177,6 +148,43 @@ class PrepareImageData():
                     spacer = '. '
                 desc.append(prod_name + spacer + prod_des)
         return data, label, desc
+    
+    @classmethod
+    def process_image(cls, im, size, mode):
+        w_req, h_req = size
+        # convert image to the given mode
+        im = im.convert(mode)
+        # flip image to maintian an aspect ratio <= 1
+        w, h = im.size
+        a_r = w / h
+        if a_r > 1.0:
+            im = im.rotate(90)
+        w, h = im.size
+        a_r = w / h
+        # resize image to required size maintaining aspect ratio
+        w_new = int(w_req)
+        h_new = int(w_req / a_r)
+        if h_new > h_req:
+            h_new = h_req
+            w_new = int(h_req * a_r)
+        im = im.resize((w_new, h_new))
+        # create a black image of the req size
+        result = Image.new(im.mode, (w_req, h_req), (0, 0, 0))
+        if w_new < w_req:
+            w_margin = (w_req - w_new) / 2
+        else:
+            w_margin = 0
+        w_margin = int(w_margin)
+        if h_new < h_req:
+            h_margin = (h_req - h_new) / 2
+        else:
+            h_margin = 0
+        h_margin = int(h_margin)
+        # paste the image on to the background to pad
+        result.paste(im, (w_margin, h_margin))
+        return result
+
+
 
 if __name__ == '__main__':
     # location for tabular
