@@ -38,7 +38,7 @@ if __name__=='__main__':
     rds_params['DBAPI'] = 'psycopg2'
     rds_params['ENDPOINT'] = "products.c8k7he1p0ynz.us-east-1.rds.amazonaws.com"
     rds_params['USER'] = 'postgres'
-    rds_params['PASSWORD'] = 'aicore2022!'
+    rds_params['PASSWORD'] = '******'
     rds_params['PORT'] = 5432
     rds_params['DATABASE'] = 'postgres'
 
