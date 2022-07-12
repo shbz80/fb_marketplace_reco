@@ -8,7 +8,7 @@ import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
 from train_test_split import TrainTestSplitFBMarketData
-from clean_tabular import basic_pipeline as tab_basic_pipeline
+from text_proc.clean_tabular import basic_pipeline as tab_basic_pipeline
 
 
 class PrepareImageData():

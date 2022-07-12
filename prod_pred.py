@@ -3,7 +3,7 @@ import os
 import joblib
 import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
-from clean_images import RGBToGrayTransformer, HogTransformer
+from image_proc.clean_images import RGBToGrayTransformer, HogTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import SGDClassifier
 
