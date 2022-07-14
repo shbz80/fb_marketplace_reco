@@ -37,7 +37,7 @@ The multimodel model learning is a scaled down implementation of a part of a lar
 ## Multimodal image-text classification
 
 ### Model training
-- combined_classification.ipynb trains a multimodal image-text classification model using the already trained image and text models. The final classification layers are removed from both the image and text CNN models and the respective feature vectors concatenated to form a combined embedding vector. This is followed by a classification layer to make the product prediction. The image and text models are not frozen during training.
+- combined_classification.ipynb trains a multimodal image-text classification model using the already trained image and text models. The final classification layers are removed from both the image and text CNN models and the respective feature vectors concatenated to form a combined embedding vector. This is followed by a classification layer to make the product prediction. The image and text models are frozen during training.
 ![System](/visuals/combined_training.png)
 *Training curve of the multimodal classification model.*
 
@@ -48,13 +48,13 @@ The trained models are dockerized and served using FastAPI. This is implemented 
 - 0.0.0.0:8008/combined
 The 0.0.0.0 ip address is a placeholder.
 
-The json response is represented below:
+The json response is represented as follows:
 res = JSONResponse(status_code=200, content={
         'pred': pred, 'classes': classes}), 
 where pred is the predicted product category and classes is the ranked categories with the most probable appearing first.
 
 ## Outcome
-- The combined model does perform better than the individual image and text models.
+- The combined model does perform better than the individual image or text models.
 - The dataset used is too small and this is reflected in the low accuracy scores of the models and the large gap between the training and validation curves.
 
 ## Future investigations
