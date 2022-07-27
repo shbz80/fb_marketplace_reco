@@ -16,8 +16,8 @@ The multimodel model learning is a scaled down implementation of a part of a lar
 ### Model training
 - prod_pred.py uses Histogram Oriented Gradient - Support Vector Machine (HOG-SVM) approach to classify the product images. This is not intended to be used in the final model.
 - image_classification.ipynb trains the image classification model using RESNET-50 (transfer learning). Only the last three layers of RESNET-50 are trained, which yileds a feature vector. Then the model adds a classification module on top of the feature vector.
-![System](/visuals/image_cnn_training.png)
-*Training curve of the transfer learning with RESNET-50.*
+<!-- ![System](/visuals/image_cnn_training.png)
+*Training curve of the transfer learning with RESNET-50.* -->
 
 ## Text classification
 
@@ -31,15 +31,15 @@ The multimodel model learning is a scaled down implementation of a part of a lar
 *Word2vec embedding of the first 300 words plotted using t-SNE*
 
 - text_classification.ipynb trains the text classification model as a CNN model operating in the word2vec embedding space.
-![System](/visuals/text_cnn_training.png)
-*Training curve of the text classification model.*
+<!-- ![System](/visuals/text_cnn_training.png)
+*Training curve of the text classification model.* -->
 
 ## Multimodal image-text classification
 
 ### Model training
 - combined_classification.ipynb trains a multimodal image-text classification model using the already trained image and text models. The final classification layers are removed from both the image and text CNN models and the respective feature vectors concatenated to form a combined embedding vector. This is followed by a classification layer to make the product prediction. The image and text models are frozen during training.
-![System](/visuals/combined_training.png)
-*Training curve of the multimodal classification model.*
+<!-- ![System](/visuals/combined_training.png) -->
+<!-- *Training curve of the multimodal classification model.* -->
 
 ## Serving
 The trained models are dockerized and served using FastAPI. This is implemented as a separate repository which is included as the submodule api. See api/fb_mk_api.py for the implementation. Three endpoints are provided each for image, text and combined:
